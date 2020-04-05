@@ -1,14 +1,15 @@
-const express = require("express")
-require('./db/mongoose')
-const User = require("./models/users")
-const Task = require("./models/Tasks")
-const UserRouter = require("./routers/user")
-const TaskRouter = require("./routers/task")
+const app = require('./app')
+// const express = require("express")
+// require('./db/mongoose')
+// const User = require("./models/users")
+// const Task = require("./models/Tasks")
+// const UserRouter = require("./routers/user")
+// const TaskRouter = require("./routers/task")
+const PORT = process.env.PORT 
 
 
-
-const app = express()
-const PORT = process.env.PORT  
+// const app = express()
+// const PORT = process.env.PORT  
 
 // const multer = require('multer')
 // const upload = multer({
@@ -43,9 +44,9 @@ const PORT = process.env.PORT
 //     }
 // })
 
-app.use(express.json())
-app.use(UserRouter)
-app.use(TaskRouter)
+// app.use(express.json())
+// app.use(UserRouter)
+// app.use(TaskRouter)
 // const router = new express.Router()
 // router.get("/test", (req,res)=>{
 //     res.send("This is from my other Router")

@@ -25,7 +25,7 @@ router.post("/users", async (req, res)=>{
 router.post('/users/login', async (req, res)=>{
     try{ 
         const user = await User.findByCredententials(req.body.email, req.body.password)
-        console.log(user)
+        //console.log(user)
         const token = await user.generateAuthToken()
         
         res.send({user , token})
@@ -65,6 +65,30 @@ router.get("/users/me", auth,async (req, res)=>{
     // }catch(e){
     //     res.status(500).send(e)
     // }
+    // User.find({}).then((users)=>{
+    //     res.status(200).send(users)
+    // }).catch((error)=>{
+    //     res.status(500)
+    //     res.send(error)
+    // })
+})
+
+router.get("/users/all", auth,async (req, res)=>{
+    
+    try{
+        const users = await User.find({})
+        const all_users = []
+
+        users.forEach((item)=>{
+            all_users.push({
+                username : item.name,
+                userID : item._id
+            })
+        })
+        res.status(200).send(all_users)
+    }catch(e){
+        res.status(500).send(e)
+    }
     // User.find({}).then((users)=>{
     //     res.status(200).send(users)
     // }).catch((error)=>{
@@ -159,6 +183,7 @@ const upload = multer({
 router.post('/users/me/avatar', auth, upload.single('avatar'), async(req, res)=>{
     // const buffer = await sharp(req.file.buffer).resize({width: 250 , height: 250}).png().toBuffer()
     req.user.avatar = req.file.buffer//buffer
+    
     await req.user.save()
     res.send()
 }, (error, req, res, next)=>{

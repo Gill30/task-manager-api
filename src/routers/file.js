@@ -1,47 +1,42 @@
 const express = require('express')
-const Task = require("../models/Tasks")
+const File = require("../models/Files")
 const auth  =require("../middleware/auth")
+const multer = require('multer')
 const router = new express.Router()
 
 
+const upload = multer({
+    dest : 'files',
+    limits : {
+        fileSize : 10000000
+    }, 
+    fileFilter (req, file, cb){
+        // !file.originalname.endsWith('.pdf')
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){
+            return cb(new Error('Please upload an image'))
+        }
 
-router.post("/tasks", auth, async(req, res)=>{
-    //const task = new Task(req.body)
-    //assuming request body has subject and title
-    const task = new Task({
-        ...req.body,
-        owner : req.user._id,
-        completed : false
-
-    })
-    try{
-        await task.save()
-        res.status(201).send(task)
-    }catch(e){
-        res.status(400).send(e)
+        cb(undefined, true)
     }
+})
+router.post("/file/:taskId",  upload.single('avatar'), async(req, res)=>{
+    //const task = new Task(req.body)
+    // const task = new Task({
+    //     ...req.body,
+    //     owner : req.user._id
+    // })
+    // try{
+    //     await task.save()
+    //     res.status(201).send(task)
+    // }catch(e){
+    //     res.status(400).send(e)
+    // }
     // task.save().then(()=>{
     //     res.status(201).send(task)
     // }).catch((error)=>{
     //     res.status(400)
     //     res.send(error)
     // })
-})
-
-router.get("/tasks/related", auth, async (req, res)=>{
-    console.log(req)
- 
-    try{
-        const tasks = await Task.find({owner :  req.user._id})
-        await req.user.populate('tasks').execPopulate()
-
-
-                res.status(200).send(req.user.tasks)
-    }catch(e){
-        res.status(500).send(e)
-    }
-
-    
 })
 
 //GET/task?completed=true
@@ -51,7 +46,7 @@ router.get("/tasks", auth, async (req, res)=>{
     console.log(req)
     const match = {}
     const sort = {}
-    
+    console.log("hello")
     if(req.query.completed){
         match.completed = req.query.completed === 'true'
     }
@@ -113,7 +108,7 @@ router.get("/tasks/:id", auth, async (req, res)=>{
 
 router.patch("/tasks/:id", auth, async (req, res)=>{
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['title', 'descrption', 'completed']
+    const allowedUpdates = ['descrption', 'completed']
     console.log(updates)
     const isValidOperation = updates.every((update)=>{
         return allowedUpdates.includes(update)
