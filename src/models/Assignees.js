@@ -7,6 +7,7 @@ const assigneeSchema  = new mongoose.Schema({
       trim : true  
    },
    type: {
+      // Not required in first version
     type : String,
     required : true
  },
@@ -19,6 +20,7 @@ const assigneeSchema  = new mongoose.Schema({
     required : true
  },
    parnet : {
+   // parent task
     type : mongoose.Schema.Types.ObjectId,
     required : true 
  },

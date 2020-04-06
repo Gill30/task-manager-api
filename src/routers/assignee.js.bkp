@@ -1,0 +1,95 @@
+const express = require('express')
+const Assignee = require("../models/Assignees")
+const auth  =require("../middleware/auth")
+const router = new express.Router()
+const Task = require("../models/Tasks")
+
+
+//create assignee
+router.post("/assignee", auth, async(req, res)=>{
+    //const task = new Task(req.body)
+    //asssumung that req body is going to have parent, user, type, status, parnetType
+    console.log(req.body)
+    const assignee = new Assignee({
+        ...req.body,
+        owner : req.user._id
+    })
+    
+    try{
+        console.log()
+        const parentTask = await Task.findOne({_id : assignee.parnet}) 
+        if(parentTask){
+            await assignee.save()
+            parentTask.assignees = parentTask.assignees.concat(assignee._id)
+            await parentTask.save()
+            res.status(201).send(assignee)
+        }else{
+            res.status(400).send(assignee)
+        }
+    }catch(e){
+        console.log(e)
+        res.status(400).send(e)
+    }
+    
+})
+
+//delete assignee
+router.delete("/assigneee/:id",auth, async (req, res)=>{
+    
+    
+    try{
+        const asignee = await Assignee.findOne({_id : req.params.id}) 
+        
+        if(!asignee){
+            res.status(404).send("Assignee Not Found")
+        }
+        
+        const task = await Task.findOne({_id : asignee.parnet, owner : req.user._id})
+        
+        if(!task){
+            res.status(404).send("Task Not Found")
+        }
+        task.assignees = task.assignees.filter((assigneeItem)=>{
+
+            return assigneeItem != asignee._id 
+        })
+        await task.save();
+        
+        await asignee.remove()
+        
+        // await task.remove()
+        res.status(200).send(asignee)
+
+    }catch(e){
+        res.status(500).send(e)
+    }
+})
+
+//get all assigee
+router.get("/assigneee/:id", auth,async (req, res)=>{
+    
+    //get all against this id
+    //get username and agaisnt each user id
+    try{
+        const assignees = await Assignee.find({ parnet : req.params.id })
+        const all_assignees = []
+        const all_users = await User.find({})
+        assignees.forEach((item)=>{
+            
+            user = all_users.filter((user_item)=>{
+                return user_item == item.user
+            })
+
+            all_assignees.push({
+                username : user.name ,
+                id : item._id
+            })
+        })
+        res.status(200).send(all_assignees)
+    }catch(e){
+        res.status(500).send(e)
+    }
+}  ) 
+
+module.exports = router
+

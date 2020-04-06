@@ -5,6 +5,7 @@ const router = new express.Router()
 const auth  =require("../middleware/auth")
 const multer = require('multer')
 
+//creating User
 router.post("/users", async (req, res)=>{
     const user = new User(req.body)
     try{
@@ -22,6 +23,7 @@ router.post("/users", async (req, res)=>{
     // })
 })
 
+//login
 router.post('/users/login', async (req, res)=>{
     try{ 
         const user = await User.findByCredententials(req.body.email, req.body.password)
@@ -34,6 +36,7 @@ router.post('/users/login', async (req, res)=>{
     }
 })
 
+//logout
 router.post("/users/logout", auth, async (req, res )=>{
     try{
         req.user.tokens = req.user.tokens.filter((token)=>{
@@ -47,6 +50,7 @@ router.post("/users/logout", auth, async (req, res )=>{
     }
 })
 
+//logout from all devices
 router.post("/users/logout/all", auth, async (req, res )=>{
     try{
         req.user.tokens = []
@@ -57,6 +61,8 @@ router.post("/users/logout/all", auth, async (req, res )=>{
         res.status(500).send(e)
     }
 })
+
+//get my profile
 router.get("/users/me", auth,async (req, res)=>{
     res.status(200).send(req.user)
     // try{
@@ -121,6 +127,7 @@ router.get("/users/all", auth,async (req, res)=>{
     // })
 // })
 
+//update user profile
 router.patch("/users/me", auth, async (req, res)=>{
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
@@ -149,6 +156,7 @@ router.patch("/users/me", auth, async (req, res)=>{
     }
 })
 
+//delete user
 router.delete("/users/me", auth, async (req, res)=>{
     try{
         // const user = await User.findByIdAndDelete(req.params.id)
