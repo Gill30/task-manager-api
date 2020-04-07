@@ -51,12 +51,12 @@ router.get("/tasks/related", auth, async (req, res)=>{
     //grab all tasks where I am owner
     // grab all where I am assignee
     //grab all where I am in replies assignee
-    const tasks = await User_related_Tasks.find({userId :  req.user._id})
+    
     try{
         const tasks = await User_related_Tasks.find({userId :  req.user._id})
-        
+        const related_tasks = await Task.find({ _id : { $in : tasks[0].tasks}}) 
 
-        res.status(200).send(tasks)
+        res.status(200).send(related_tasks)
     }catch(e){
         res.status(500).send(e)
     }

@@ -6,7 +6,7 @@ const user_related_Tasks_Schema  = new mongoose.Schema({
       type : mongoose.Schema.Types.ObjectId,
       required : true 
    },
-   tasks:[String]
+   tasks:[mongoose.Schema.Types.ObjectId]
   
  
   }, {
@@ -16,13 +16,22 @@ const user_related_Tasks_Schema  = new mongoose.Schema({
   user_related_Tasks_Schema.statics.insertTask = async (userId, taskId)=>{
     const user = await User_related_Tasks.findOne({userId : userId})
     if(!user){
-        const new_user = new User({
+        const new_user = new User_related_Tasks({
             userId : userId,
             tasks : [taskId]
         }) 
         await new_user.save();
     }else{
-        if(!(taskId in user.tasks)){
+        
+        
+        const match=user.tasks.filter((item)=>{
+            
+            return item.toString() == taskId.toString()
+        })
+        console.log(match)
+        const match_not_found = match.length == 0?true:false;
+        if(match_not_found){
+            
             user.tasks = user.tasks.concat(taskId)
             await user.save()
         }
