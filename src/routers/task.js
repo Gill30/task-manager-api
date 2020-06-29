@@ -51,11 +51,11 @@ router.get("/tasks/related", auth, async (req, res)=>{
     //grab all tasks where I am owner
     // grab all where I am assignee
     //grab all where I am in replies assignee
-    
+   
     try{
         const tasks = await User_related_Tasks.find({userId :  req.user._id})
         const related_tasks = await Task.find({ _id : { $in : tasks[0].tasks}}) 
-
+        console.log(related_tasks)
         res.status(200).send(related_tasks)
     }catch(e){
         res.status(500).send(e)
@@ -110,7 +110,7 @@ router.get("/tasks/:id", auth, async (req, res)=>{
     const _id = req.params.id
     try{
         //const task = await Task.findById(_id)
-        const task = await Task.findOne({_id, owner : req.user._id})
+        const task = await Task.findOne({_id})
         if(!task){
             res.status(404).send("Task not found")
         }
@@ -135,10 +135,26 @@ router.get("/tasks/:id", auth, async (req, res)=>{
     // })
 })
 
+router.get("/tasks/single/:id", auth, async (req, res)=>{
+    const _id = req.params.id
+    try{
+        //const task = await Task.findById(_id)
+        const task = await Task.findOne({_id})
+        if(!task){
+            res.status(404).send("Task not found")
+        }
+        
+    
+        res.status(200).send(task)
+    }catch(e){
+        res.status(500).send(e)
+    }
+    
+})
 
 router.patch("/tasks/:id", auth, async (req, res)=>{
     const updates = Object.keys(req.body)
-    const allowedUpdates = ['title', 'descrption', 'completed']
+    const allowedUpdates = ['title', 'descrption', 'completed', 'assignees']
     console.log(updates)
     const isValidOperation = updates.every((update)=>{
         return allowedUpdates.includes(update)
