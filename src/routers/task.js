@@ -3,6 +3,7 @@ const Task = require("../models/Tasks")
 const User_related_Tasks = require("../models/user_related_tasks")
 const auth  =require("../middleware/auth")
 const router = new express.Router()
+const pagingutitlity = require("../Utils/pagingutitlity")
 
 
 //Create Task
@@ -46,8 +47,12 @@ router.post("/tasks", auth, async(req, res)=>{
 })
 
 router.get("/tasks/related", auth, async (req, res)=>{
-    
+    var page = 1
     related_task = []
+    if(req.query.page){
+        page = +req.query.page
+        console.log(page)
+    }
     //grab all tasks where I am owner
     // grab all where I am assignee
     //grab all where I am in replies assignee
@@ -55,8 +60,13 @@ router.get("/tasks/related", auth, async (req, res)=>{
     try{
         const tasks = await User_related_Tasks.find({userId :  req.user._id})
         const related_tasks = await Task.find({ _id : { $in : tasks[0].tasks}}) 
-        console.log(related_tasks)
-        res.status(200).send(related_tasks)
+        //console.log(related_tasks)
+       
+        related_tasks.sort(function(a, b){
+            return b.updatedAt -a.updatedAt;
+        })
+
+        res.status(200).send(pagingutitlity.getPageData(related_tasks, page));
     }catch(e){
         res.status(500).send(e)
     }
@@ -94,7 +104,7 @@ router.get("/tasks", auth, async (req, res)=>{
         }).execPopulate()
         console.log(req.user.tasks)
         res.status(200).send(req.user.tasks)
-    }catch(e){
+    }catch(e){ 
         res.status(500).send(e)
     }
 
