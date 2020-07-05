@@ -48,7 +48,7 @@ router.post("/tasks", auth, async(req, res)=>{
 
 router.get("/tasks/related", auth, async (req, res)=>{
     var page = 1
-    related_task = []
+    related_tasks = []
     if(req.query.page){
         page = +req.query.page
         console.log(page)
@@ -59,15 +59,18 @@ router.get("/tasks/related", auth, async (req, res)=>{
    
     try{
         const tasks = await User_related_Tasks.find({userId :  req.user._id})
-        const related_tasks = await Task.find({ _id : { $in : tasks[0].tasks}}) 
-        //console.log(related_tasks)
-       
-        related_tasks.sort(function(a, b){
-            return b.updatedAt -a.updatedAt;
-        })
-
+        if(tasks[0]){
+            related_tasks = await Task.find({ _id : { $in : tasks[0].tasks}}) 
+            //console.log(related_tasks)
+            
+            related_tasks.sort(function(a, b){
+                return b.updatedAt -a.updatedAt;
+            })
+            
+        }
         res.status(200).send(pagingutitlity.getPageData(related_tasks, page));
     }catch(e){
+        console.log(e)
         res.status(500).send(e)
     }
 

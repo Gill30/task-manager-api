@@ -8,7 +8,7 @@ const pagingutitliy = {
         const endOfList = ending_index < list.length ? false : true;
         
         const task = list.slice(starting_index, ending_index);
-
+        
         return {
             endOfList, 
             task
